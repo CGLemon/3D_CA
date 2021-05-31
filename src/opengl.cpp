@@ -1,4 +1,6 @@
 #include "opengl.h"
+#include "gpio.h"
+
 
 CELL_TYPE cell[CELL_SIZE];
 CELL_TYPE cell_next[CELL_SIZE];
@@ -175,6 +177,8 @@ void glut_keyboard(unsigned char key, int x, int y){
     printf("Stats:\n");
     printf("  %.3f (sec) \n" ,during_times);
     printf("  %.3f (generations/sec) \n", static_cast<float>(generation)/during_times);
+
+    Listener::get().stop();
     exit(0);
   }
 
@@ -498,6 +502,11 @@ void timer(int value) {
     if (is_move) {
       g_angle1 += M_1_PI * 0.015;
     }
+
+    if (Listener::get().probe()) {
+        append_cells();
+    }
+
 #ifdef USE_OPENCL
     OpenCL::get().update_cells(cell);
 #else 
@@ -1003,6 +1012,25 @@ void update_cells(){
 #endif
 
   std::copy(std::begin(cell_next), std::end(cell_next), std::begin(cell));
+}
+
+void append_cells() {
+  static std::random_device seed_gen;
+  static std::default_random_engine engine(seed_gen());
+  static std::bernoulli_distribution distribution(INIT_CELL_PROPOTION);
+
+  for (int y = GRID_SIZE_Y / 10 * 3; y < GRID_SIZE_Y / 10 * 7; y++){
+    for (int x = GRID_SIZE_X / 10 * 3; x < GRID_SIZE_X / 10 * 7; x++){
+      for (int z = GRID_SIZE_Z / 10 * 3; z < GRID_SIZE_Z / 10 * 7; z++) {
+        for (int i = 1; i < N_STATE; i++){
+          if (distribution(engine)){
+            cell[grid_index(x, y ,z)] = N_STATE - i;
+            break;
+          }
+        }
+      }
+    }
+  }
 }
 
 inline int cycle_y(int y){        //境界を消去

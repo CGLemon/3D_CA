@@ -12,9 +12,9 @@ static constexpr double DEG_RATE = 15.0;           // グラデーションの�
  * 以上
  * ***************************************************************/
 
-static constexpr int GRID_SIZE_X = 100;              //gridの縦と横
-static constexpr int GRID_SIZE_Y = 100;
-static constexpr int GRID_SIZE_Z = 100;
+static constexpr int GRID_SIZE_X = 60;              //gridの縦と横
+static constexpr int GRID_SIZE_Y = 60;
+static constexpr int GRID_SIZE_Z = 60;
 
 using CELL_TYPE = char;
 

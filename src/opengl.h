@@ -61,6 +61,7 @@ void init_cells();
 int count_adjacent_cells(int x, int y, int z);
 int count_adjacent_cells_2(int x, int y, int z);
 void update_cells();
+void append_cells();
 bool check_around(int dx, int dy, int dz, int state);
 
 bool check_near(int x, int y, int z);

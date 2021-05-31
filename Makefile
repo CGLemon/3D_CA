@@ -31,7 +31,7 @@ endif
 
 ifeq ($(CPUS),)
 	openmp_cpus = 4
-else 
+else
 	openmp_cpus = $(CPUS)
 endif
 
@@ -39,6 +39,7 @@ CXXFLAGS = -Wall -Wextra -O3 -std=c++11
 
 ifeq ($(OS), Linux)
 	LDFLAGS += -lGL -lGLU -lglut
+    LDFLAGS += -lpthread
 else ifeq ($(OS), Darwin)
 	LDFLAGS += -framework OpenGL -framework GLUT
 endif
@@ -57,7 +58,7 @@ ifeq ($(opencl), yes)
 	endif
 endif
 
-SRCS = src/3D_LifeGame.cpp src/opencl.cpp src/opengl.cpp
+SRCS = src/3D_LifeGame.cpp src/opencl.cpp src/opengl.cpp src/gpio.cpp
 FLAGS = $(CXXFLAGS) $(LDFLAGS)
 
 release:

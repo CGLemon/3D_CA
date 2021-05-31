@@ -1,13 +1,16 @@
 #include "config.h"
 #include "opencl.h"
 #include "opengl.h"
+#include "gpio.h"
 
 int main(int argc, char *argv[]){
   
 #ifdef USE_OPENCL
   OpenCL::get().init();
 #endif
-  
+
+  Listener::get().run();
+
   /* OpenGLの初期化 */
   init_GL(argc,argv);
 
