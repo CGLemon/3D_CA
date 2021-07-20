@@ -669,9 +669,9 @@ void draw_lifegame(){
   GLfloat point_color[4];
   if (color_ver == 0) { 
     // 原点から再奥までのグラデーション
-    for (int y = 0; y < GRID_SIZE_Y; y++){
-      for (int x = 0; x < GRID_SIZE_X; x++){
-        for (int z = 0; z < GRID_SIZE_Z; z++){
+    for (int z = 0; z < GRID_SIZE_Z; z++){
+      for (int y = 0; y < GRID_SIZE_Y; y++){
+        for (int x = 0; x < GRID_SIZE_X; x++){
           if (cell[grid_index(x, y, z)]) {
             point_color[0] = (double)(x) / GRID_SIZE_X;
             point_color[1] = (double)(y) / GRID_SIZE_Y;
@@ -695,9 +695,9 @@ void draw_lifegame(){
       hsv2rgb(hsv_color, rgb_colors[i]);
       //std::cout << rgb_colors[i][0] << rgb_colors[i][1] << rgb_colors[i][2] << std::endl;
     }
-    for (int y = 0; y < GRID_SIZE_Y; y++){
-      for (int x = 0; x < GRID_SIZE_X; x++){
-        for (int z = 0; z < GRID_SIZE_Z; z++){
+    for (int z = 0; z < GRID_SIZE_Z; z++){
+      for (int y = 0; y < GRID_SIZE_Y; y++){
+        for (int x = 0; x < GRID_SIZE_X; x++){
           if (cell[grid_index(x, y, z)]) {
             for (int i = 0; i < N_STATE-1; i++){
               if (cell[grid_index(x, y, z)] == i+1) {
@@ -743,10 +743,10 @@ void draw_lifegame(){
   } else if (color_ver == 2){
     // 単色
     GLfloat color[4] = {1.0, 1.0, 1.0, 1.0};
-
-    for (int y = 0; y < GRID_SIZE_Y; y++){
-      for (int x = 0; x < GRID_SIZE_X; x++){
-        for (int z = 0; z < GRID_SIZE_Z; z++){
+      
+    for (int z = 0; z < GRID_SIZE_Z; z++){
+      for (int y = 0; y < GRID_SIZE_Y; y++){
+        for (int x = 0; x < GRID_SIZE_X; x++){
           if (cell[grid_index(x, y, z)]) {
             draw_cube_trans(Point((double)x, (double)y, double(z)), color);
           }
@@ -758,9 +758,9 @@ void draw_lifegame(){
     GLfloat hsv_color[4] = {0.0, 1.0, 1.0};
     GLfloat rgb_color[4];
     GLfloat point_color[4];
-    for (int y = 0; y < GRID_SIZE_Y; y++){
-      for (int x = 0; x < GRID_SIZE_X; x++){
-        for (int z = 0; z < GRID_SIZE_Z; z++){
+    for (int z = 0; z < GRID_SIZE_Z; z++){
+      for (int y = 0; y < GRID_SIZE_Y; y++){
+        for (int x = 0; x < GRID_SIZE_X; x++){
           if (cell[grid_index(x, y, z)]) {
             hsv_color[0]= 15*std::sqrt((double)(x - GRID_SIZE_X / 2) * (x - GRID_SIZE_X / 2) +
                                        (double)(y - GRID_SIZE_Y / 2) * (y - GRID_SIZE_Y / 2) + 
@@ -878,34 +878,15 @@ void init_cells(){
 
 // ここのcheck_around()は編集
 
-int count_adjacent_cells(int x, int y, int z) {
+int count_adjacent_cells(int x, int y, int z, int bouns) {
   int n = 0;
-  int dx, dy, dz;
-  int state = cell[grid_index(x, y, z)];
+  int state = cell[grid_index(x, y, z)] + bouns;
 
-  for (dx = x - 1; dx <= x + 1; dx++) {
-    for (dy = y - 1; dy <= y + 1; dy++) {
-      for (dz = z - 1; dz <= z + 1; dz++){
-        if (dx == x && dy == y && dz == z) continue;
-        if (check_around(cycle_x(dx), cycle_y(dy), cycle_z(dz), state) == true) {
-          n++;
-        }
-      }
-    }
-  }
-  return n;
-}
-
-int count_adjacent_cells_2(int x, int y, int z) {
-  int n = 0;
-  int dx, dy, dz;
-  int state = cell[grid_index(x, y, z)]+1;
-
-  for (dx = x - 1; dx <= x + 1; dx++) {
-    for (dy = y - 1; dy <= y + 1; dy++) {
-      for (dz = z - 1; dz <= z + 1; dz++) {
+  for (int dz = z - 1; dz <= z + 1; dz++) {
+    for (int dy = y - 1; dy <= y + 1; dy++) {
+      for (int dx = x - 1; dx <= x + 1; dx++) {
         if (dx == x && dy == y && dz == z) {
-          continue;
+            continue;
         }
         if (check_around(cycle_x(dx), cycle_y(dy), cycle_z(dz), state) == true) {
           n++;
@@ -921,17 +902,17 @@ int count_adjacent_cells_2(int x, int y, int z) {
 // state は自分の状態
 
 inline bool check_around(int dx, int dy, int dz, int state){
+  int val = cell[grid_index(dx, dy, dz)];
   if (state == 0){
     // 新しいセルを発生させられるかどうか
 
-    return cell[grid_index(dx, dy, dz)] >= N_STATE - 1;  
-  } else {
-    // 自分の状態より「良い」状態のセルかどうか
-
-    return cell[grid_index(dx, dy, dz)] == state - 1; //  == true;
-    // ここは >= stateが一番動いてるけど...
-    // > state, やってほしいのは   == state+1
+    return val >= N_STATE - 1;  
   }
+  // 自分の状態より「良い」状態のセルかどうか
+
+  return val == state - 1; //  == true;
+  // ここは >= stateが一番動いてるけど...
+  // > state, やってほしいのは   == state+1
 }
 
 inline bool check_birth(int idx, int n) {
@@ -968,8 +949,8 @@ void update_cells(){
       const int y = res / GRID_SIZE_X;
       const int x = res % GRID_SIZE_X;
 
-      const int n = count_adjacent_cells(x, y, z);
-      const int m = count_adjacent_cells_2(x, y, z);
+      const int n = count_adjacent_cells(x, y, z, 0);
+      const int m = count_adjacent_cells(x, y, z, 1);
       if (check_survive(idx, n) || check_survive(idx, m)) { // survive
         cell_next[idx] = cell[idx];
         cell_next[idx]--;
@@ -983,12 +964,12 @@ void update_cells(){
 
 #else
   // More faster in one thread.
-  for (int x = 0; x < GRID_SIZE_X; x++) {
+  for (int z = 0; z < GRID_SIZE_Z; z++){
     for (int y = 0; y < GRID_SIZE_Y; y++) {
-      for (int z = 0; z < GRID_SIZE_Z; z++){
+      for (int x = 0; x < GRID_SIZE_X; x++) {
         const int index = grid_index(x, y, z);
-        const int n = count_adjacent_cells(x, y, z);
-        const int m = count_adjacent_cells_2(x, y, z);
+        const int n = count_adjacent_cells(x, y, z, 0);
+        const int m = count_adjacent_cells(x, y, z, 1);
         if (check_survive(index, n) || check_survive(index, m)) { // survive
           cell_next[index] = cell[index];
           cell_next[index]--;

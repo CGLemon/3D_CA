@@ -58,8 +58,7 @@ int cycle_x(int x);
 int cycle_y(int y);
 int cycle_z(int z);
 void init_cells();
-int count_adjacent_cells(int x, int y, int z);
-int count_adjacent_cells_2(int x, int y, int z);
+int count_adjacent_cells(int x, int y, int z, int bouns);
 void update_cells();
 bool check_around(int dx, int dy, int dz, int state);
 
